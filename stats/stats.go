@@ -160,7 +160,7 @@ type Histogram struct {
 	Offset  float64 // offset applied to data before fitting into buckets
 	Divider float64 // divider applied to data before fitting into buckets
 	// Don't access directly (outside of this package):
-	Hdata []int32 // numValues buckets (one more than values, for last one)
+	Hdata []int64 // numValues buckets (one more than values, for last one)
 }
 
 // For export of the data:
@@ -209,7 +209,7 @@ func NewHistogram(offset float64, divider float64) *Histogram {
 	h := Histogram{
 		Offset:  offset,
 		Divider: divider,
-		Hdata:   make([]int32, numBuckets),
+		Hdata:   make([]int64, numBuckets),
 	}
 	return &h
 }
@@ -293,7 +293,7 @@ func (h *Histogram) record(v float64, count int) {
 		log.Debugf("v %f -> scaledVal %.17f ceil %f delta %g - svInt %d", v, scaledVal, math.Ceil(scaledVal), delta, svInt)
 		idx = lookUpIdx(svInt)
 	}
-	h.Hdata[idx] += int32(count)
+	h.Hdata[idx] += int64(count)
 }
 
 // CalcPercentile returns the value for an input percentile
@@ -365,7 +365,7 @@ func (h *Histogram) Export() *HistogramData {
 			continue
 		}
 		var b Bucket
-		total += int64(h.Hdata[i])
+		total += h.Hdata[i]
 		if len(res.Data) == 0 {
 			// First entry, start is min
 			b.Start = h.Min
@@ -382,7 +382,7 @@ func (h *Histogram) Export() *HistogramData {
 			b.Start = multiplier*float64(prev) + offset
 			b.End = h.Max
 		}
-		b.Count = int64(h.Hdata[i])
+		b.Count = h.Hdata[i]
 		res.Data = append(res.Data, b)
 	}
 	res.Data[len(res.Data)-1].End = h.Max

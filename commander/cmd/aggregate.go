@@ -82,6 +82,8 @@ var aggregateCmd = &cobra.Command{
 // merge aggregates the non-histogram results of two test runs
 func merge(a, b *fhttp.HTTPRunnerResults) *fhttp.HTTPRunnerResults {
 	a.ActualQPS += b.ActualQPS
+	a.NumConnections += b.NumConnections
+	a.NumThreads += b.NumThreads
 
 	// duration should be the superset of the two time windows (assumes overlapping)
 	if a.StartTime.Add(a.ActualDuration).Before(b.StartTime.Add(b.ActualDuration)) {
